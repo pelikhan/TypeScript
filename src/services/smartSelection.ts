@@ -48,7 +48,19 @@ import {
     textSpansEqual,
 } from "./_namespaces/ts.js";
 
-/** @internal */
+/** 
+ * Computes a smart selection range for a given position in a source file.
+ * 
+ * The function determines the most appropriate selection range based on the 
+ * syntax tree and context of the position. It considers various node types, 
+ * including function bodies, blocks, template spans, variable declarations, 
+ * and JSDoc nodes. It also handles special cases like multi-line blocks, 
+ * string literals, and template literals.
+ * 
+ * Parameters:
+ * - pos: The position in the source file for which the selection range is computed.
+ * - sourceFile: The source file containing the position.
+ */
 export function getSmartSelectionRange(pos: number, sourceFile: SourceFile): SelectionRange {
     let selectionRange: SelectionRange = {
         textSpan: createTextSpanFromBounds(sourceFile.getFullStart(), sourceFile.getEnd()),

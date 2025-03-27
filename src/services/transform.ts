@@ -15,7 +15,7 @@ import {
  * Transform one or more nodes using the supplied transformers.
  * @param source A single `Node` or an array of `Node` objects.
  * @param transformers An array of `TransformerFactory` callbacks used to process the transformation.
- * @param compilerOptions Optional compiler options.
+ * @param compilerOptions Optional compiler options. If provided, they will be fixed up and used during the transformation.
  */
 export function transform<T extends Node>(source: T | T[], transformers: TransformerFactory<T>[], compilerOptions?: CompilerOptions): TransformationResult<T> {
     const diagnostics: DiagnosticWithLocation[] = [];

@@ -345,6 +345,17 @@ export class TextStorage {
     }
 }
 
+/**
+ * Determines if a given file name represents a dynamic file.
+ * 
+ * A dynamic file name is identified based on specific patterns:
+ * - It starts with the character "^".
+ * - It contains either "walkThroughSnippet:/" or "untitled:/", and the base file name starts with "^".
+ * - It includes ":^" but does not contain the directory separator.
+ * 
+ * @param fileName The file name to check, normalized to a consistent format.
+ * @returns `true` if the file name matches dynamic patterns; otherwise, `false`.
+ */
 export function isDynamicFileName(fileName: NormalizedPath): boolean {
     return fileName[0] === "^" ||
         ((fileName.includes("walkThroughSnippet:/") || fileName.includes("untitled:/")) &&
@@ -739,7 +750,11 @@ function failIfInvalidLocation(location: protocol.Location) {
     Debug.assert(location.offset > 0, `Expected offset to be non-${location.offset === 0 ? "zero" : "negative"}`);
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Determines if the given ScriptInfo is contained by a background project.
+ * @param info The ScriptInfo to check.
+ */
 export function scriptInfoIsContainedByBackgroundProject(info: ScriptInfo): boolean {
     return some(
         info.containingProjects,
@@ -747,7 +762,11 @@ export function scriptInfoIsContainedByBackgroundProject(info: ScriptInfo): bool
     );
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Determines if the given ScriptInfo is contained by any project that is deferred for closure.
+ * @param info The ScriptInfo to check.
+ */
 export function scriptInfoIsContainedByDeferredClosedProject(info: ScriptInfo): boolean {
     return some(
         info.containingProjects,

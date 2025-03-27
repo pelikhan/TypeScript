@@ -39,7 +39,17 @@ import {
 } from "./_namespaces/ts.js";
 import { ChangeTracker } from "./textChanges.js";
 
-/** @internal */
+/**
+ * Maps code changes to a source file by parsing the provided content and placing the resulting nodes in the appropriate locations.
+ * 
+ * @param sourceFile - The source file to which changes will be applied.
+ * @param contents - An array of strings representing the code content to be parsed and inserted.
+ * @param focusLocations - Optional array of text span arrays indicating specific locations to focus on for placing nodes.
+ * @param host - The language service host providing necessary context for changes.
+ * @param formatContext - The formatting context to ensure changes adhere to formatting rules.
+ * @param preferences - User preferences for formatting and other settings.
+ * @returns An array of file text changes representing the applied modifications.
+ */
 export function mapCode(
     sourceFile: SourceFile,
     contents: string[],

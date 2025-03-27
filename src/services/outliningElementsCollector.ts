@@ -55,7 +55,14 @@ import {
     TryStatement,
 } from "./_namespaces/ts.js";
 
-/** @internal */
+/** 
+ * @internal
+ * Collects outlining spans from the given source file.
+ * 
+ * @param sourceFile The source file to analyze for outlining spans.
+ * @param cancellationToken A token to monitor for cancellation requests.
+ * @returns An array of outlining spans sorted by their start positions.
+ */
 export function collectElements(sourceFile: SourceFile, cancellationToken: CancellationToken): OutliningSpan[] {
     const res: OutliningSpan[] = [];
     addNodeOutliningSpans(sourceFile, cancellationToken, res);

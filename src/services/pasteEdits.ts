@@ -36,7 +36,18 @@ import {
 } from "./types.js";
 
 const fixId = "providePostPasteEdits";
-/** @internal */
+/**
+ * Provides edits for pasting text into a target file, including handling imports and resolving identifiers.
+ * 
+ * @param targetFile - The file into which text is being pasted.
+ * @param pastedText - The array of text segments being pasted.
+ * @param pasteLocations - The locations in the target file where the text is being pasted.
+ * @param copiedFrom - Information about the source file and ranges from which the text was copied, if applicable.
+ * @param host - The language service host.
+ * @param preferences - User preferences for formatting and other settings.
+ * @param formatContext - The context for formatting the pasted text.
+ * @param cancellationToken - Token to signal cancellation of the operation.
+ */
 export function pasteEditsProvider(
     targetFile: SourceFile,
     pastedText: string[],

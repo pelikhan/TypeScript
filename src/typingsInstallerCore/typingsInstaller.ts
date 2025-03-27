@@ -72,7 +72,17 @@ function typingToFileName(cachePath: string, packageName: string, installTypingH
     }
 }
 
-/** @internal */
+/** 
+ * Installs npm packages by constructing and executing npm install commands.
+ * Iterates through the list of package names and constructs commands to install them in batches.
+ * If the command length exceeds a certain limit, it reduces the batch size.
+ * 
+ * @param npmPath - The path to the npm executable.
+ * @param tsVersion - The TypeScript version to include in the user-agent string.
+ * @param packageNames - The list of package names to install.
+ * @param install - A callback function that executes the npm install command and returns whether it succeeded.
+ * @returns Whether any errors occurred during the installation process.
+ */
 export function installNpmPackages(npmPath: string, tsVersion: string, packageNames: string[], install: (command: string) => boolean): boolean {
     let hasError = false;
     for (let remaining = packageNames.length; remaining > 0;) {
@@ -83,7 +93,17 @@ export function installNpmPackages(npmPath: string, tsVersion: string, packageNa
     return hasError;
 }
 
-/** @internal */
+/** 
+ * Constructs an npm install command for installing TypeScript typings packages.
+ * 
+ * Splits the package names into smaller chunks if the command exceeds the maximum length.
+ * 
+ * @param npmPath - The path to the npm executable.
+ * @param tsVersion - The TypeScript version to include in the user-agent string.
+ * @param packageNames - The list of package names to install.
+ * @param remaining - The number of packages remaining to be processed.
+ * @returns An object containing the constructed npm command and the updated count of remaining packages.
+ */
 export function getNpmCommandForInstallation(npmPath: string, tsVersion: string, packageNames: string[], remaining: number): {
     command: string;
     remaining: number;
@@ -532,7 +552,11 @@ export abstract class TypingsInstaller {
     protected readonly latestDistTag = "latest";
 }
 
-/** @internal */
+/**
+ * Constructs the typings package name for a given package name, appending the TypeScript version.
+ * @param packageName The name of the package for which to construct the typings name.
+ * @returns The typings package name in the format `@types/<packageName>@ts<versionMajorMinor>`.
+ */
 export function typingsName(packageName: string): string {
     return `@types/${packageName}@ts${versionMajorMinor}`;
 }

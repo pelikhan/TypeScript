@@ -172,7 +172,13 @@ export enum ProjectKind {
 /** @internal */
 export type Mutable<T> = { -readonly [K in keyof T]: T[K]; };
 
-/** @internal */
+/** 
+ * @internal
+ * Counts the number of files of each script kind in the provided list of ScriptInfo objects.
+ * Optionally includes the sizes of the files.
+ * @param infos - The list of ScriptInfo objects to analyze.
+ * @param includeSizes - Whether to include file sizes in the result.
+ */
 export function countEachFileTypes(infos: ScriptInfo[], includeSizes = false): FileStats {
     const result: Mutable<FileStats> = {
         js: 0,
@@ -232,12 +238,24 @@ export function allRootFilesAreJsOrDts(project: Project): boolean {
     return counts.ts === 0 && counts.tsx === 0;
 }
 
+/**
+ * Determines whether all files in a project's script infos are either JavaScript files
+ * or declaration (.d.ts) files, excluding TypeScript (.ts) and JSX (.tsx) files.
+ *
+ * @param project - The project containing script infos to analyze.
+ * @returns true if no .ts or .tsx files are present, false otherwise.
+ */
 export function allFilesAreJsOrDts(project: Project): boolean {
     const counts = countEachFileTypes(project.getScriptInfos());
     return counts.ts === 0 && counts.tsx === 0;
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Determines if the provided file names array contains no TypeScript source files.
+ * A TypeScript source file is identified as a `.ts` file that is not a declaration file, or a `.tsx` file.
+ * @param fileNames - The array of file names to check.
+ */
 export function hasNoTypeScriptSource(fileNames: string[]): boolean {
     return !fileNames.some(fileName => (fileExtensionIs(fileName, Extension.Ts) && !isDeclarationFileName(fileName)) || fileExtensionIs(fileName, Extension.Tsx));
 }
@@ -3179,27 +3197,47 @@ export class ExternalProject extends Project {
     }
 }
 
-/** @internal */
+/** 
+ * Determines if the given project is an inferred project.
+ * @param project The project to check.
+ */
 export function isInferredProject(project: Project): project is InferredProject {
     return project.projectKind === ProjectKind.Inferred;
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Determines if the given project is a configured project.
+ * @param project The project to check.
+ * @returns True if the project is a configured project, otherwise false.
+ */
 export function isConfiguredProject(project: Project): project is ConfiguredProject {
     return project.projectKind === ProjectKind.Configured;
 }
 
-/** @internal */
+/** 
+ * Determines if the given project is an external project.
+ * @param project The project to check.
+ */
 export function isExternalProject(project: Project): project is ExternalProject {
     return project.projectKind === ProjectKind.External;
 }
 
-/**@internal */
+/** 
+ * @internal 
+ * Determines if the given project is a background project.
+ * @param project The project to check.
+ * @returns True if the project is an AutoImportProviderProject or AuxiliaryProject, otherwise false.
+ */
 export function isBackgroundProject(project: Project): project is AutoImportProviderProject | AuxiliaryProject {
     return project.projectKind === ProjectKind.AutoImportProvider || project.projectKind === ProjectKind.Auxiliary;
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Determines if the given project is a ConfiguredProject with a deferred close.
+ * @param project The project to check.
+ */
 export function isProjectDeferredClose(project: Project): project is ConfiguredProject {
     return isConfiguredProject(project) && !!project.deferredClose;
 }

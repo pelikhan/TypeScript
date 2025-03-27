@@ -50,7 +50,19 @@ import {
     UserPreferences,
 } from "./_namespaces/ts.js";
 
-/** @internal */
+/** 
+ * @internal
+ * Updates the necessary file references and imports when a file or directory is renamed.
+ * 
+ * @param program The TypeScript program instance.
+ * @param oldFileOrDirPath The original path of the file or directory being renamed.
+ * @param newFileOrDirPath The new path of the file or directory after renaming.
+ * @param host The language service host providing file system operations.
+ * @param formatContext The formatting context for text changes.
+ * @param preferences User preferences for code editing.
+ * @param sourceMapper The source mapper for resolving source positions.
+ * @returns An array of file text changes reflecting the updates.
+ */
 export function getEditsForFileRename(
     program: Program,
     oldFileOrDirPath: string,
@@ -77,7 +89,15 @@ export function getEditsForFileRename(
  */
 export type PathUpdater = (path: string) => string | undefined;
 // exported for tests
-/** @internal */
+/** 
+ * Creates a function that updates file or directory paths based on a mapping from an old path to a new path.
+ * 
+ * @param oldFileOrDirPath - The original file or directory path.
+ * @param newFileOrDirPath - The new file or directory path to map to.
+ * @param getCanonicalFileName - A function to get the canonical form of a file name.
+ * @param sourceMapper - An optional source mapper to resolve source positions.
+ * @returns A function that takes a path and returns the updated path or undefined if no update is needed.
+ */
 export function getPathUpdater(oldFileOrDirPath: string, newFileOrDirPath: string, getCanonicalFileName: GetCanonicalFileName, sourceMapper: SourceMapper | undefined): PathUpdater {
     const canonicalOldPath = getCanonicalFileName(oldFileOrDirPath);
     return path => {

@@ -50,7 +50,14 @@ export interface SourceMapperHost {
     log(s: string): void;
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Creates a SourceMapper instance for mapping positions between generated and source files.
+ * 
+ * @param host - The SourceMapperHost providing necessary methods and properties for file and program access.
+ * 
+ * @returns A SourceMapper object with methods to map positions, clear cache, and access document position mappers.
+ */
 export function getSourceMapper(host: SourceMapperHost): SourceMapper {
     const getCanonicalFileName = createGetCanonicalFileName(host.useCaseSensitiveFileNames());
     const currentDirectory = host.getCurrentDirectory();
@@ -177,7 +184,20 @@ export function getSourceMapper(host: SourceMapperHost): SourceMapper {
  */
 export type ReadMapFile = (mapFileName: string, mapFileNameFromDts: string | undefined) => string | undefined | DocumentPositionMapper | false;
 
-/** @internal */
+/** 
+ * Retrieves a DocumentPositionMapper for a given generated file and its line information.
+ * Attempts to locate and parse a source map file associated with the generated file.
+ * Supports both inline base64-encoded source maps and external source map files.
+ * 
+ * Parameters:
+ * - host: Provides methods to interact with the file system and logging.
+ * - generatedFileName: The name of the generated file for which the mapper is needed.
+ * - generatedFileLineInfo: Line information of the generated file.
+ * - readMapFile: A function to read and parse the source map file.
+ * 
+ * Returns:
+ * - A DocumentPositionMapper if a valid source map is found and parsed, otherwise undefined.
+ */
 export function getDocumentPositionMapper(
     host: DocumentPositionMapperHost,
     generatedFileName: string,

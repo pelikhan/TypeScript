@@ -104,6 +104,12 @@ export type ImportTracker = (exportSymbol: Symbol, exportInfo: ExportInfo, isFor
 /**
  * Creates the imports map and returns an ImportTracker that uses it. Call this lazily to avoid calling `getDirectImportsMap` unnecessarily.
  *
+ * @param sourceFiles - The source files to analyze for imports.
+ * @param sourceFilesSet - A set of source file names for quick lookup.
+ * @param checker - The TypeScript type checker.
+ * @param cancellationToken - Optional token to signal cancellation.
+ * @returns An ImportTracker function that provides information about direct and indirect importers for a given export.
+ *
  * @internal
  */
 export function createImportTracker(sourceFiles: readonly SourceFile[], sourceFilesSet: ReadonlySet<string>, checker: TypeChecker, cancellationToken: CancellationToken | undefined): ImportTracker {
@@ -469,7 +475,15 @@ export type ModuleReference =
     /** Containing file implicitly references the module (eg, via implicit jsx runtime import) */
     | { kind: "implicit"; literal: StringLiteralLike; referencingFile: SourceFile; };
 
-/** @internal */
+/** 
+ * @internal
+ * Finds references to a specific module within a set of source files.
+ * 
+ * @param program The program containing the source files.
+ * @param sourceFiles The source files to search for module references.
+ * @param searchModuleSymbol The symbol of the module to search for references.
+ * @returns An array of module references found in the source files.
+ */
 export function findModuleReferences(program: Program, sourceFiles: readonly SourceFile[], searchModuleSymbol: Symbol): ModuleReference[] {
     const refs: ModuleReference[] = [];
     const checker = program.getTypeChecker();
@@ -576,6 +590,12 @@ export interface ExportedSymbol {
  * If at an import, look locally for the symbol it imports.
  * If at an export, look for all imports of it.
  * This doesn't handle export specifiers; that is done in `getReferencesAtExportSpecifier`.
+ * If we are in `export =` or `export default`, handles those cases specifically.
+ * Handles special cases like `module.exports` and `exports.A`.
+ * Handles JSDoc typedef and callback tags.
+ * @param node The node to analyze for import/export references.
+ * @param symbol The symbol associated with the node.
+ * @param checker The TypeChecker instance to resolve symbols.
  * @param comingFromExport If we are doing a search for all exports, don't bother looking backwards for the imported symbol, since that's the reason we're here.
  *
  * @internal
@@ -749,7 +769,14 @@ function isNodeImport(node: Node): boolean {
     }
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Retrieves information about an export symbol, including its exporting module symbol and export kind.
+ * @param exportSymbol The symbol representing the export.
+ * @param exportKind The kind of the export.
+ * @param checker The type checker used to resolve symbols.
+ * @returns The export information if the symbol is part of an external module, otherwise undefined.
+ */
 export function getExportInfo(exportSymbol: Symbol, exportKind: ExportKind, checker: TypeChecker): ExportInfo | undefined {
     const moduleSymbol = exportSymbol.parent;
     if (!moduleSymbol) return undefined; // This can happen if an `export` is not at the top-level (which is a compile error).

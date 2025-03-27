@@ -1,6 +1,12 @@
 import * as ts from "../typescript/typescript.js";
 
-/** @internal */
+/** 
+ * Determines the log level based on the provided string.
+ * 
+ * @param level - The string representation of the log level.
+ * @returns The corresponding log level if matched, otherwise undefined.
+ * @internal 
+ */
 export function getLogLevel(level: string | undefined): ts.server.LogLevel | undefined {
     if (level) {
         const l = level.toLowerCase();

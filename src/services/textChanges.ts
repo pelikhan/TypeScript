@@ -436,7 +436,14 @@ function getEndPositionOfMultilineTrailingComment(sourceFile: SourceFile, node: 
     return undefined;
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Adjusts the end position of a node in a source file based on the provided options.
+ * 
+ * @param sourceFile The source file containing the node.
+ * @param node The node whose end position is to be adjusted.
+ * @param options Configuration options for adjusting the end position.
+ */
 export function getAdjustedEndPosition(sourceFile: SourceFile, node: Node, options: ConfigurableEnd): number {
     const { end } = node;
     const { trailingTriviaOption } = options;
@@ -484,7 +491,10 @@ export type TypeAnnotatable = SignatureDeclaration | VariableDeclaration | Param
 /** @internal */
 export type ThisTypeAnnotatable = FunctionDeclaration | FunctionExpression;
 
-/** @internal */
+/**
+ * Determines if the given function is annotatable with a 'this' type.
+ * @param containingFunction - The function to check.
+ */
 export function isThisTypeAnnotatable(containingFunction: SignatureDeclaration): containingFunction is ThisTypeAnnotatable {
     return isFunctionExpression(containingFunction) || isFunctionDeclaration(containingFunction);
 }
@@ -1262,7 +1272,24 @@ function getMembersOrProperties(node: ClassLikeDeclaration | InterfaceDeclaratio
 export type ValidateNonFormattedText = (node: Node, text: string) => void;
 
 namespace changesToText {
-    export function getTextChangesFromChanges(changes: readonly Change[], newLineCharacter: string, formatContext: formatting.FormatContext, validate: ValidateNonFormattedText | undefined): FileTextChanges[] {
+    /**
+ * Generates a list of FileTextChanges based on a collection of changes, ensuring proper formatting, ordering, and validation.
+ * 
+ * Args:
+ *     changes: A collection of updates (add, remove, or replace) to be applied to source files.
+ *     newLineCharacter: The character(s) used to represent a newline in the output.
+ *     formatContext: Provides context for formatting options, including indentation and spacing settings.
+ *     validate: (Optional) A function to validate the correctness of non-formatted text in changes.
+ * 
+ * Returns:
+ *     A list of FileTextChanges, containing organized and valid changes for each file.
+ * 
+ * Notes:
+ *     - Changes are grouped by source file and ordered by start position. If start positions are the same, shorter ranges are prioritized.
+ *     - Overlapping change intervals are not allowed, except possibly at end points.
+ *     - Redundant changes are filtered out if the new text matches the existing text in the target source file.
+ */
+export function getTextChangesFromChanges(changes: readonly Change[], newLineCharacter: string, formatContext: formatting.FormatContext, validate: ValidateNonFormattedText | undefined): FileTextChanges[] {
         return mapDefined(group(changes, c => c.sourceFile.path), changesInFile => {
             const sourceFile = changesInFile[0].sourceFile;
             // order changes by start position
@@ -1291,12 +1318,35 @@ namespace changesToText {
         });
     }
 
-    export function newFileChanges(fileName: string, insertions: readonly NewFileInsertion[], newLineCharacter: string, formatContext: formatting.FormatContext): FileTextChanges {
+    /**
+ * Creates a set of changes representing the content of a new file.
+ * 
+ * @param fileName - Name of the file to be created.
+ * @param insertions - List of insertions containing statements or new line trivia.
+ * @param newLineCharacter - Character(s) to use for new line formatting.
+ * @param formatContext - Formatting context for ensuring the text adheres to specific formatting rules.
+ * 
+ * @returns An object containing the file name, text changes specifying the new file content, 
+ *          and a flag indicating it is a new file.
+ */
+export function newFileChanges(fileName: string, insertions: readonly NewFileInsertion[], newLineCharacter: string, formatContext: formatting.FormatContext): FileTextChanges {
         const text = newFileChangesWorker(getScriptKindFromFileName(fileName), insertions, newLineCharacter, formatContext);
         return { fileName, textChanges: [createTextChange(createTextSpan(0, 0), text)], isNewFile: true };
     }
 
-    export function newFileChangesWorker(scriptKind: ScriptKind, insertions: readonly NewFileInsertion[], newLineCharacter: string, formatContext: formatting.FormatContext): string {
+    /**
+* Formats the content of a new file based on provided insertions and returns the formatted text.
+* 
+* Parameters:
+* - scriptKind: Indicates the type of script (e.g., JS, TS) for the new file content.
+* - insertions: A list of objects containing statements or trivia to be included in the new file.
+* - newLineCharacter: The character used to represent a line break in the output (e.g., "\n" or "\r\n").
+* - formatContext: Formatting configuration used to style the resulting file content.
+* 
+* Returns:
+* - The formatted text of the new file with applied changes and a trailing newline character.
+*/
+export function newFileChangesWorker(scriptKind: ScriptKind, insertions: readonly NewFileInsertion[], newLineCharacter: string, formatContext: formatting.FormatContext): string {
         // TODO: this emits the file, parses it back, then formats it that -- may be a less roundabout way to do this
         const nonFormattedText = flatMap(insertions, insertion => insertion.statements.map(s => s === SyntaxKind.NewLineTrivia ? "" : getNonformattedText(s, insertion.oldFile, newLineCharacter).text)).join(newLineCharacter);
         const sourceFile = createSourceFile("any file name", nonFormattedText, { languageVersion: ScriptTarget.ESNext, jsDocParsingMode: JSDocParsingMode.ParseNone }, /*setParentNodes*/ true, scriptKind);
@@ -1346,7 +1396,13 @@ namespace changesToText {
         return applyChanges(text, changes);
     }
 
-    /** Note: output node may be mutated input node. */
+    /**
+ * Note: output node may be mutated input node.
+ * Generates nonformatted text for a given node.
+ * @param node The node to generate text for.
+ * @param sourceFile The source file containing the node, if available.
+ * @param newLineCharacter The character(s) to use for new lines.
+ */
     export function getNonformattedText(node: Node, sourceFile: SourceFile | undefined, newLineCharacter: string): { text: string; node: Node; } {
         const writer = createWriter(newLineCharacter);
         const newLine = getNewLineKind(newLineCharacter);
@@ -1360,7 +1416,14 @@ namespace changesToText {
     }
 }
 
-/** @internal */
+/** 
+ * Applies a series of text changes to the given text. 
+ * 
+ * @param text The original text to apply changes to.
+ * @param changes The list of changes to apply, processed in reverse order.
+ * @returns The modified text after all changes have been applied.
+ * @internal 
+ */
 export function applyChanges(text: string, changes: readonly TextChange[]): string {
     for (let i = changes.length - 1; i >= 0; i--) {
         const { span, newText } = changes[i];
@@ -1383,7 +1446,11 @@ const textChangesTransformationContext: TransformationContext = {
     ),
 };
 
-/** @internal */
+/**
+ * @internal
+ * Assigns positions to a given node by visiting its children and creating a proxy node for non-synthesized nodes.
+ * Ensures the text range of the new node matches the original node.
+ */
 export function assignPositionsToNode(node: Node): Node {
     const visited = visitEachChild(node, assignPositionsToNode, textChangesTransformationContext, assignPositionsToNodeArray, assignPositionsToNode);
     // create proxy node for non synthesized nodes
@@ -1413,7 +1480,12 @@ function assignPositionsToNodeArray(
 /** @internal */
 export interface TextChangesWriter extends EmitTextWriter, PrintHandlers {}
 
-/** @internal */
+/** 
+ * @internal
+ * Creates a writer for text changes with various utility methods for writing and formatting text.
+ * Includes handlers for emitting nodes, tokens, and arrays, as well as methods for managing indentation, 
+ * retrieving text, and clearing the writer state.
+ */
 export function createWriter(newLine: string): TextChangesWriter {
     let lastNonTriviaPosition = 0;
 
@@ -1661,7 +1733,13 @@ function getInsertionPositionAtSourceFileTop(sourceFile: SourceFile): number {
     }
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Determines if a given position in a source file is a valid location to add a comment.
+ * 
+ * @param sourceFile The source file to check.
+ * @param position The position within the source file to check.
+ */
 export function isValidLocationToAddComment(sourceFile: SourceFile, position: number): boolean {
     return !isInComment(sourceFile, position) && !isInString(sourceFile, position) && !isInTemplateString(sourceFile, position) && !isInJSXText(sourceFile, position);
 }
@@ -1672,7 +1750,28 @@ function needSemicolonBetween(a: Node, b: Node): boolean {
 }
 
 namespace deleteDeclaration {
-    export function deleteDeclaration(changes: ChangeTracker, deletedNodesInLists: Set<Node>, sourceFile: SourceFile, node: Node): void {
+    /**
+* Deletes a specified TypeScript node from the source file.
+* 
+* Parameters:
+* - changes: The ChangeTracker instance that records the changes made to the source file.
+* - deletedNodesInLists: A set to track nodes within lists that are already deleted, preventing duplicate operations on the same node.
+* - sourceFile: The source file containing the node to be deleted.
+* - node: The node to be deleted, such as an import declaration, parameter, or variable.
+* 
+* Behavior:
+* - Handles various types of nodes with specific deletion strategies, ensuring the AST remains valid.
+* - Deletes nodes in lists, standalone declarations, and bindings, adjusting spacing and commas as necessary.
+* - For functions, parameters, and arrow functions, ensures the syntactic structure remains correct.
+* - Deletes import statements and bindings, taking care of related references or comments.
+* - Deletes variable declarations with consideration of their parent context, like for-loops or catch clauses.
+* - Deletes type parameters, ensuring the list remains valid.
+* - Deletes import specifiers and namespace imports, handling cases where they are the only element in their parent.
+* - Deletes semicolon tokens and function keywords with appropriate trivia handling.
+* - Deletes class and function declarations, considering JSDoc comments if present.
+* - Handles default cases for nodes not explicitly covered, ensuring they are deleted from the source file.
+*/
+export function deleteDeclaration(changes: ChangeTracker, deletedNodesInLists: Set<Node>, sourceFile: SourceFile, node: Node): void {
         switch (node.kind) {
             case SyntaxKind.Parameter: {
                 const oldFunction = node.parent;
@@ -1838,7 +1937,13 @@ namespace deleteDeclaration {
 
 // Exported for tests only! (TODO: improve tests to not need this)
 /**
- * Warning: This deletes comments too. See `copyComments` in `convertFunctionToEs6Class`.
+ * Deletes a node from the source file, including its comments unless specified otherwise.
+ * See `copyComments` in `convertFunctionToEs6Class`.
+ *
+ * @param changes The change tracker to apply the deletion.
+ * @param sourceFile The source file containing the node.
+ * @param node The node to delete.
+ * @param options Configuration for handling leading and trailing trivia.
  *
  * @internal
  */

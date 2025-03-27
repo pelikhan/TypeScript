@@ -12,7 +12,14 @@ import {
 } from "./_namespaces/ts.js";
 import { isInImport } from "./refactors/moveToFile.js";
 
-/** @internal */
+/** 
+ * @internal 
+ * Determines whether paste edits should be provided based on the copied range and its context in the source file.
+ * @param sourceFile The source file where the paste operation is being performed.
+ * @param copiedFromRange The ranges of text that were copied.
+ * @param checker The type checker used to resolve symbols.
+ * @returns True if paste edits should be provided, otherwise false.
+ */
 export function preparePasteEdits(
     sourceFile: SourceFile,
     copiedFromRange: TextRange[],

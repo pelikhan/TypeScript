@@ -1347,6 +1347,16 @@ export interface DisplayPartsSymbolWriter extends EmitTextWriter {
 /** @internal */
 export function toEditorSettings(options: FormatCodeOptions | FormatCodeSettings): FormatCodeSettings;
 export function toEditorSettings(options: EditorOptions | EditorSettings): EditorSettings;
+/**
+* Converts the provided map-like object into a standardized format where all property keys are camel-cased.
+* If all properties are already camel-cased, the original object is returned unchanged.
+* 
+* Parameters:
+* - optionsAsMap: A map-like object containing key-value pairs. The function ensures that all keys follow camel-case conventions. Keys that are not camel-cased are transformed.
+* 
+* Returns:
+* - A new map-like object with all keys transformed into camel-case, if necessary.
+*/
 export function toEditorSettings(optionsAsMap: MapLike<any>): MapLike<any> {
     let allPropertiesAreCamelCased = true;
     for (const key in optionsAsMap) {
@@ -1372,6 +1382,11 @@ function isCamelCase(s: string) {
     return !s.length || s.charAt(0) === s.charAt(0).toLowerCase();
 }
 
+/**
+ * Converts an array of SymbolDisplayPart objects into a concatenated string of their text.
+ * @param displayParts - An array of SymbolDisplayPart objects or undefined. If provided, the "text" property of each object will be concatenated.
+ * @returns A string that concatenates the "text" property of each SymbolDisplayPart in the array or an empty string if no parts are provided.
+ */
 export function displayPartsToString(displayParts: SymbolDisplayPart[] | undefined): string {
     if (displayParts) {
         return map(displayParts, displayPart => displayPart.text).join("");
@@ -1380,6 +1395,13 @@ export function displayPartsToString(displayParts: SymbolDisplayPart[] | undefin
     return "";
 }
 
+/**
+ * Retrieves the default compiler options for the TypeScript language service.
+ *
+ * @returns An object containing the default compiler options.
+ *           - `target`: Specifies the default script target, which is ES5.
+ *           - `jsx`: Specifies the default JSX handling, which is Preserve.
+ */
 export function getDefaultCompilerOptions(): CompilerOptions {
     // Always default to "ScriptTarget.ES5" for the language service
     return {
@@ -1388,6 +1410,11 @@ export function getDefaultCompilerOptions(): CompilerOptions {
     };
 }
 
+/**
+ * Retrieves a list of supported error codes for which code fixes are available.
+ * 
+ * @returns An array of error codes that the language service can provide fixes for.
+ */
 export function getSupportedCodeFixes(): readonly string[] {
     return codefix.getSupportedErrorCodes();
 }
@@ -1453,6 +1480,17 @@ function setSourceFileFields(sourceFile: SourceFile, scriptSnapshot: IScriptSnap
     sourceFile.scriptSnapshot = scriptSnapshot;
 }
 
+/**
+ * Creates a SourceFile for the language service.
+ *
+ * @param fileName - Path to the file to be processed.
+ * @param scriptSnapshot - Snapshot of the file's current state.
+ * @param scriptTargetOrOptions - Specifies the ECMAScript target or source file creation options.
+ * @param version - Version of the file for tracking purposes.
+ * @param setNodeParents - Indicates whether to set parent links for syntax nodes.
+ * @param scriptKind - The script kind (JS, TS, JSX, etc.) to specify the file type. Optional.
+ * @returns A newly created SourceFile object for the specified file.
+ */
 export function createLanguageServiceSourceFile(
     fileName: string,
     scriptSnapshot: IScriptSnapshot,
@@ -1466,6 +1504,24 @@ export function createLanguageServiceSourceFile(
     return sourceFile;
 }
 
+/**
+ * Updates a source file in the language service to reflect changes in its text.
+ *
+ * @param sourceFile The original source file to update.
+ * @param scriptSnapshot An updated snapshot of the script's text.
+ * @param version The new version string of the script.
+ * @param textChangeRange The range of text changes. If undefined, the file will be parsed entirely.
+ * @param aggressiveChecks Whether to perform additional incremental parsing validation.
+ * @returns The updated source file instance.
+ *
+ * If a `textChangeRange` is provided and the version has changed, the function performs incremental parsing 
+ * to improve performance. For deletions, the prefix and suffix are concatenated. For edits, the appropriate 
+ * text fragment is updated. If no `textChangeRange` is given, the function regenerates the entire source file.
+ *
+ * If incremental parsing is performed, the name table is reset to allow lazy recreation later, and resources 
+ * held by the old script snapshot are disposed of if applicable. If no incremental parsing is performed, a 
+ * new source file is created with the provided options.
+ */
 export function updateLanguageServiceSourceFile(sourceFile: SourceFile, scriptSnapshot: IScriptSnapshot, version: string, textChangeRange: TextChangeRange | undefined, aggressiveChecks?: boolean): SourceFile {
     // If we were given a text change range, and our version or open-ness changed, then
     // incrementally parse this file.
@@ -1624,6 +1680,23 @@ const invalidOperationsInSyntacticMode: readonly (keyof LanguageService)[] = [
     "getApplicableRefactors",
     "preparePasteEditsForFile",
 ];
+/**
+ * Creates a language service instance for working with TypeScript programs, providing 
+ * access to syntactic, semantic, and programmatic features of TypeScript source files.
+ *
+ * @param host - The LanguageServiceHost, providing necessary methods and configurations 
+ *               to the language service.
+ * @param documentRegistry - (Optional) A document registry to manage source files. 
+ *                           Defaults to a newly created registry using host configurations.
+ * @param syntaxOnlyOrLanguageServiceMode - (Optional) Boolean or LanguageServiceMode 
+ *                                          to indicate the type of service; defaults 
+ *                                          to semantic mode. If a boolean is provided, 
+ *                                          true indicates syntactic mode and false indicates 
+ *                                          semantic mode.
+ *
+ * @returns A LanguageService object providing features like diagnostics, completions, 
+ *          navigation, formatting, and refactors.
+ */
 export function createLanguageService(
     host: LanguageServiceHost,
     documentRegistry: DocumentRegistry = createDocumentRegistry(host.useCaseSensitiveFileNames && host.useCaseSensitiveFileNames(), host.getCurrentDirectory(), host.jsDocParsingMode),
@@ -3466,6 +3539,11 @@ export function createLanguageService(
 /**
  * Names in the name table are escaped, so an identifier `__foo` will have a name table entry `___foo`.
  *
+ * Initializes and retrieves the name table for the given source file.
+ *
+ * @param sourceFile The source file for which the name table is retrieved.
+ * @returns The name table mapping names to their occurrences.
+ *
  * @internal
  */
 export function getNameTable(sourceFile: SourceFile): Map<__String, number> {
@@ -3511,8 +3589,9 @@ function literalIsName(node: StringLiteralLike | NumericLiteral): boolean {
 }
 
 /**
- * Returns the containing object literal property declaration given a possible name node, e.g. "a" in x = { "a": 1 }
- *
+ * Returns the containing object literal property declaration given a possible name node, e.g. "a" in x = { "a": 1 }.
+ * 
+ * @param node - The node to check for its containing object literal property declaration.
  * @internal
  */
 export function getContainingObjectLiteralElement(node: Node): ObjectLiteralElementWithName | undefined {
@@ -3555,6 +3634,12 @@ function getSymbolAtLocationForQuickInfo(node: Node, checker: TypeChecker): Symb
 /**
  * Gets all symbols for one property. Does not get symbols for every property.
  *
+ * @param node The object literal element with a name to extract symbols for.
+ * @param checker The type checker used to validate types.
+ * @param contextualType The contextual type to retrieve property symbols from.
+ * @param unionSymbolOk Whether to allow symbols from union types.
+ * @returns An array of symbols for the specified property.
+ *
  * @internal
  */
 export function getPropertySymbolsFromContextualType(node: ObjectLiteralElementWithName, checker: TypeChecker, contextualType: Type, unionSymbolOk: boolean): readonly Symbol[] {
@@ -3590,9 +3675,12 @@ function isArgumentOfElementAccessExpression(node: Node) {
 }
 
 /**
- * Get the path of the default library files (lib.d.ts) as distributed with the typescript
+ * Get the path of the default library files (lib.d.ts) as distributed with the TypeScript
  * node package.
  * The functionality is not supported if the ts module is consumed outside of a node module.
+ * 
+ * @param options Compiler options used to determine the default library file name.
+ * @returns The path to the default library files.
  */
 export function getDefaultLibFilePath(options: CompilerOptions): string {
     if (sys) {

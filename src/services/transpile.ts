@@ -51,36 +51,48 @@ const optionsRedundantWithVerbatimModuleSyntax = new Set([
     "isolatedModules",
 ]);
 
-/*
- * This function will compile source text from 'input' argument using specified compiler options.
- * If no options are provided - it will use a set of default compiler options.
- * Extra compiler options that will unconditionally be used by this function are:
- * - isolatedModules = true
- * - allowNonTsExtensions = true
- * - noLib = true
- * - noResolve = true
- * - declaration = false
- * - noCheck = true
- */
+/**
+* /*
+*  * This function will compile source text from the 'input' argument using specified compiler options.
+*  * If no options are provided, it will use a set of default compiler options.
+*  * Extra compiler options that will unconditionally be used by this function are:
+*  * - isolatedModules = true
+*  * - allowNonTsExtensions = true
+*  * - noLib = true
+*  * - noResolve = true
+*  * - declaration = false
+*  * - noCheck = true
+*  * 
+*  * Parameters:
+*  * - input: The source text to be compiled.
+*  * - transpileOptions: An object containing options for the transpilation process.
+*  */
+*/
 export function transpileModule(input: string, transpileOptions: TranspileOptions): TranspileOutput {
     return transpileWorker(input, transpileOptions, /*declaration*/ false);
 }
 
-/*
- * This function will create a declaration file from 'input' argument using specified compiler options.
- * If no options are provided - it will use a set of default compiler options.
- * Extra compiler options that will unconditionally be used by this function are:
- * - isolatedDeclarations = true
- * - isolatedModules = true
- * - allowNonTsExtensions = true
- * - noLib = true
- * - noResolve = true
- * - declaration = true
- * - emitDeclarationOnly = true
- * - noCheck = true
- * Note that this declaration file may differ from one produced by a full program typecheck,
- * in that only types in the single input file are available to be used in the generated declarations.
- */
+/**
+* /*
+*  * This function will create a declaration file from the 'input' argument using specified compiler options.
+*  * If no options are provided, it will use a set of default compiler options.
+*  * Extra compiler options that will unconditionally be used by this function are:
+*  * - isolatedDeclarations = true
+*  * - isolatedModules = true
+*  * - allowNonTsExtensions = true
+*  * - noLib = true
+*  * - noResolve = true
+*  * - declaration = true
+*  * - emitDeclarationOnly = true
+*  * - noCheck = true
+*  * Note that this declaration file may differ from one produced by a full program typecheck,
+*  * in that only types in the single input file are available to be used in the generated declarations.
+*  * 
+*  * Parameters:
+*  * - input: The source text to be transpiled into a declaration file.
+*  * - transpileOptions: An object containing options to customize the transpilation process.
+*  */
+*/
 export function transpileDeclaration(input: string, transpileOptions: TranspileOptions): TranspileOutput {
     return transpileWorker(input, transpileOptions, /*declaration*/ true);
 }
@@ -218,9 +230,18 @@ function transpileWorker(input: string, transpileOptions: TranspileOptions, decl
     return { outputText, diagnostics, sourceMapText };
 }
 
-/*
- * This is a shortcut function for transpileModule - it accepts transpileOptions as parameters and returns only outputText part of the result.
- */
+/**
+* /*
+*  * This is a shortcut function for transpileModule - it accepts transpileOptions as parameters and returns only the outputText part of the result.
+*  * 
+*  * Parameters:
+*  * - input: The source code to transpile.
+*  * - compilerOptions: Optional compiler options to customize the transpilation process.
+*  * - fileName: Optional name of the file being transpiled.
+*  * - diagnostics: Optional array to collect diagnostic information during transpilation.
+*  * - moduleName: Optional module name to set for the source file.
+*  */
+*/
 export function transpile(input: string, compilerOptions?: CompilerOptions, fileName?: string, diagnostics?: Diagnostic[], moduleName?: string): string {
     const output = transpileModule(input, { compilerOptions, fileName, reportDiagnostics: !!diagnostics, moduleName });
     // addRange correctly handles cases when wither 'from' or 'to' argument is missing
@@ -231,9 +252,11 @@ export function transpile(input: string, compilerOptions?: CompilerOptions, file
 let commandLineOptionsStringToEnum: CommandLineOptionOfCustomType[];
 
 /**
- * JS users may pass in string values for enum compiler options (such as ModuleKind), so convert.
+ * Fixes up compiler options by converting string values for enum compiler options (such as ModuleKind) to their corresponding enum values.
+ * Lazily initializes the mapping of string values to enum values to avoid module loading errors.
  *
- * @internal
+ * @param options The compiler options to fix up.
+ * @param diagnostics An array to collect any diagnostics generated during the fix-up process.
  */
 export function fixupCompilerOptions(options: CompilerOptions, diagnostics: Diagnostic[]): CompilerOptions {
     // Lazily create this value to fix module loading errors.

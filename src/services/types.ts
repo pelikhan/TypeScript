@@ -237,7 +237,14 @@ export namespace ScriptSnapshot {
         }
     }
 
-    export function fromString(text: string): IScriptSnapshot {
+    /**
+ * Creates a script snapshot from a string, providing an immutable representation
+ * of the text for use in scenarios such as incremental parsing.
+ *
+ * @param text The input string to be encapsulated in a script snapshot.
+ * @returns An IScriptSnapshot instance representing the provided text.
+ */
+export function fromString(text: string): IScriptSnapshot {
         return new StringScriptSnapshot(text);
     }
 }
@@ -1205,6 +1212,14 @@ export interface FormatCodeSettings extends EditorSettings {
     readonly indentSwitchCase?: boolean;
 }
 
+/**
+ * Generates the default format code settings for a TypeScript editor.
+ *
+ * @param newLineCharacter An optional string specifying the newline character to use (e.g., "\n" or "\r\n").
+ *                          Defaults to "\n" if not provided.
+ * @returns An object containing formatting settings such as indentation, spacing, code style preferences,
+ *          and other configurations like semicolon handling and whitespace trimming.
+ */
 export function getDefaultFormatCodeSettings(newLineCharacter?: string): FormatCodeSettings {
     return {
         indentSize: 4,

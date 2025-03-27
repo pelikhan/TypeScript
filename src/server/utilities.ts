@@ -77,7 +77,13 @@ export class GcTimer {
     }
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Gets the base configuration file name from the given configuration file path.
+ * 
+ * @param configFilePath - The normalized path to the configuration file.
+ * @returns The base configuration file name if it is "tsconfig.json" or "jsconfig.json", otherwise undefined.
+ */
 export function getBaseConfigFileName(configFilePath: NormalizedPath): "tsconfig.json" | "jsconfig.json" | undefined {
     const base = getBaseFileName(configFilePath);
     return base === "tsconfig.json" || base === "jsconfig.json" ? base : undefined;

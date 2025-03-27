@@ -278,7 +278,12 @@ function convertToLocation(lineAndCharacter: LineAndCharacter): protocol.Locatio
 export function formatDiagnosticToProtocol(diag: Diagnostic, includeFileName: true): protocol.DiagnosticWithFileName;
 /** @internal */
 export function formatDiagnosticToProtocol(diag: Diagnostic, includeFileName: false): protocol.Diagnostic;
-/** @internal */
+/** 
+ * @internal
+ * Formats a Diagnostic object into a protocol-compliant diagnostic object.
+ * @param diag The diagnostic to format.
+ * @param includeFileName Whether to include the file name in the formatted diagnostic.
+ */
 export function formatDiagnosticToProtocol(diag: Diagnostic, includeFileName: boolean): protocol.Diagnostic | protocol.DiagnosticWithFileName {
     const start = (diag.file && convertToLocation(getLineAndCharacterOfPosition(diag.file, diag.start!)))!; // TODO: GH#18217
     const end = (diag.file && convertToLocation(getLineAndCharacterOfPosition(diag.file, diag.start! + diag.length!)))!; // TODO: GH#18217
@@ -320,6 +325,19 @@ export type CommandNames = protocol.CommandTypes;
 /** @deprecated use ts.server.protocol.CommandTypes */
 export const CommandNames: any = (protocol as any).CommandTypes;
 
+/**
+ * Formats a message as a protocol-compliant string for communication.
+ * 
+ * Parameters:
+ * - msg: The protocol message to format.
+ * - logger: The logger instance for logging informational or verbose output.
+ * - byteLength: A function to calculate the byte length of the string using a specific encoding.
+ * - newLine: The newline character(s) to append to the formatted message.
+ * 
+ * Returns:
+ * - A formatted string representation of the protocol message, adhering to the protocol's expected format.
+ * - Logs the message in verbose mode if the logger has the verbose level enabled.
+ */
 export function formatMessage<T extends protocol.Message>(msg: T, logger: Logger, byteLength: (s: string, encoding: BufferEncoding) => number, newLine: string): string {
     const verboseLogging = logger.hasLevel(LogLevel.verbose);
 
@@ -470,7 +488,13 @@ export interface EventSender {
     event: Event;
 }
 
-/** @internal */
+/** 
+ * Converts the given event name and body into a protocol event object.
+ * 
+ * @param eventName - The name of the event.
+ * @param body - The body of the event.
+ * @internal 
+ */
 export function toEvent(eventName: string, body: object): protocol.Event {
     return {
         seq: 0,
@@ -4027,7 +4051,14 @@ export interface HandlerResponse {
 }
 
 /** @internal */
-// Exported only for tests
+/**
+* // Computes the location in the new document after applying a series of text edits.
+* // Parameters:
+* // - oldText: The original text of the document.
+* // - renameFilename: The name of the file being renamed.
+* // - renameLocation: The position in the original document where the rename occurs.
+* // - edits: The list of text changes to apply to the original document.
+*/
 export function getLocationInNewDocument(oldText: string, renameFilename: string, renameLocation: number, edits: readonly FileTextChanges[]): protocol.Location {
     const newText = applyEdits(oldText, renameFilename, edits);
     const { line, character } = computeLineAndCharacterOfPosition(computeLineStarts(newText), renameLocation);

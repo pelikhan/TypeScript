@@ -66,11 +66,18 @@ import {
 } from "./_namespaces/ts.js";
 
 /**
- * Organize imports by:
+ * Organize imports and exports by:
  *   1) Removing unused imports
  *   2) Coalescing imports from the same module
  *   3) Sorting imports
+ *   4) Organizing exports
  *
+ * @param sourceFile - The source file to organize.
+ * @param formatContext - The formatting context for the operation.
+ * @param host - The language service host.
+ * @param program - The TypeScript program instance.
+ * @param preferences - User preferences for organizing imports.
+ * @param mode - The mode of organizing imports (e.g., remove unused, sort and combine, etc.).
  * @internal
  */
 export function organizeImports(
@@ -874,7 +881,13 @@ function getOrganizeImportsStringComparer(preferences: UserPreferences, ignoreCa
         getOrganizeImportsOrdinalStringComparer(ignoreCase);
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Determines the string comparer for organizing imports based on the detected module specifier case.
+ * @param originalImportDecls The original import declarations to analyze.
+ * @param preferences The user preferences to guide the detection process.
+ * @returns An object containing the string comparer and a flag indicating if the imports are already sorted.
+ */
 export function getOrganizeImportsStringComparerWithDetection(originalImportDecls: readonly AnyImportOrRequireStatement[], preferences: UserPreferences): { comparer: Comparer<string>; isSorted: boolean; } {
     return detectModuleSpecifierCaseBySort([originalImportDecls], getDetectionLists(preferences).comparersToTest);
 }
@@ -883,7 +896,15 @@ function getNamedImportSpecifierComparer<T extends ImportOrExportSpecifier>(pref
     return (s1, s2) => compareImportOrExportSpecifiers(s1, s2, stringComparer, preferences);
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Determines the comparer for named import specifiers and detects if they are sorted.
+ * 
+ * @param importDecl The import declaration or JSDoc import tag to analyze.
+ * @param preferences The user preferences for organizing imports.
+ * @param sourceFile Optional source file to analyze other import statements for detection.
+ * @returns An object containing the specifier comparer and a flag indicating if the imports are sorted.
+ */
 export function getNamedImportSpecifierComparerWithDetection(importDecl: ImportDeclaration | JSDocImportTag, preferences: UserPreferences, sourceFile?: SourceFile): { specifierComparer: Comparer<ImportSpecifier>; isSorted: boolean | undefined; } {
     // sort case sensitivity:
     // - if the user preference is explicit, use that
@@ -913,19 +934,38 @@ export function getNamedImportSpecifierComparerWithDetection(importDecl: ImportD
     return { specifierComparer, isSorted };
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Determines the insertion index for a new import declaration in a sorted list of imports.
+ * @param sortedImports The list of existing import or require statements, sorted in order.
+ * @param newImport The new import or require statement to insert.
+ * @param comparer A function to compare strings for sorting.
+ */
 export function getImportDeclarationInsertionIndex(sortedImports: readonly AnyImportOrRequireStatement[], newImport: AnyImportOrRequireStatement, comparer: Comparer<string>): number {
     const index = binarySearch(sortedImports, newImport, identity, (a, b) => compareImportsOrRequireStatements(a, b, comparer));
     return index < 0 ? ~index : index;
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Determines the insertion index for a new import specifier in a sorted list of import specifiers.
+ * @param sortedImports The list of import specifiers, assumed to be sorted.
+ * @param newImport The new import specifier to insert.
+ * @param comparer A function to compare two import specifiers.
+ * @returns The index at which the new import specifier should be inserted.
+ */
 export function getImportSpecifierInsertionIndex(sortedImports: readonly ImportSpecifier[], newImport: ImportSpecifier, comparer: Comparer<ImportSpecifier>): number {
     const index = binarySearch(sortedImports, newImport, identity, comparer);
     return index < 0 ? ~index : index;
 }
 
-/** @internal */
+/** 
+ * Compares two import or require statements based on their module specifiers and import kinds.
+ * 
+ * @param s1 - The first import or require statement to compare.
+ * @param s2 - The second import or require statement to compare.
+ * @param comparer - A function to compare the module specifiers.
+ */
 export function compareImportsOrRequireStatements(s1: AnyImportOrRequireStatement, s2: AnyImportOrRequireStatement, comparer: Comparer<string>): Comparison {
     return compareModuleSpecifiersWorker(getModuleSpecifierExpression(s1), getModuleSpecifierExpression(s2), comparer) || compareImportKind(s1, s2);
 }
@@ -933,7 +973,12 @@ export function compareImportsOrRequireStatements(s1: AnyImportOrRequireStatemen
 /* ======== Functions that are internal for testing ======== */
 
 /**
+ * Coalesces a group of ImportDeclarations with the same module name into a single ImportDeclaration.
+ *
  * @param importGroup a list of ImportDeclarations, all with the same module name.
+ * @param ignoreCase whether to ignore case when comparing import specifiers.
+ * @param sourceFile the source file containing the imports.
+ * @param preferences user preferences for organizing imports.
  *
  * @deprecated Only used for testing
  * @internal
@@ -946,6 +991,8 @@ export function testCoalesceImports(importGroup: readonly ImportDeclaration[], i
 
 /**
  * @param exportGroup a list of ExportDeclarations, all with the same module name.
+ * @param ignoreCase whether to compare specifiers case-insensitively.
+ * @param preferences optional user preferences for organizing imports.
  *
  * @deprecated Only used for testing
  * @internal
@@ -956,6 +1003,10 @@ export function testCoalesceExports(exportGroup: readonly ExportDeclaration[], i
 }
 
 /**
+ * Compares two module specifiers.
+ * @param m1 The first module specifier.
+ * @param m2 The second module specifier.
+ * @param ignoreCase Whether to ignore case during comparison.
  * @deprecated Only used for testing
  * @internal
  */
