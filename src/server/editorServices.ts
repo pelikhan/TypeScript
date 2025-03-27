@@ -449,6 +449,14 @@ const defaultTypeSafeList: SafeList = {
     },
 };
 
+/**
+ * Converts format code settings from the protocol representation to the server's internal representation.
+ *
+ * @param protocolOptions - The format code settings as specified in the protocol request.
+ *   The `indentStyle` property, if provided as a string, is mapped to the internal enum representation.
+ *   An assertion is made to ensure the `indentStyle` is defined after conversion.
+ * @returns The converted format code settings compatible with the server.
+ */
 export function convertFormatOptions(protocolOptions: protocol.FormatCodeSettings): FormatCodeSettings {
     if (isString(protocolOptions.indentStyle)) {
         protocolOptions.indentStyle = indentStyle.get(protocolOptions.indentStyle.toLowerCase());
@@ -457,6 +465,21 @@ export function convertFormatOptions(protocolOptions: protocol.FormatCodeSetting
     return protocolOptions as any;
 }
 
+/**
+ * Converts external project compiler options received from protocol to CompilerOptions
+ * and includes CompileOnSaveMixin options.
+ *
+ * @param protocolOptions - An object containing compiler options defined by clients
+ * in external projects, often provided in protocol-specific formats.
+ * 
+ * Uses a mapping (compilerOptionConverters) to transform protocol-specific option
+ * names and values into a form compatible with TypeScript's `CompilerOptions`.
+ * It normalizes and converts string-based options where applicable using the mapping.
+ * Updates the protocolOptions object in place by replacing string-based options
+ * with their mapped values.
+ * 
+ * Returns the converted CompilerOptions object.
+ */
 export function convertCompilerOptions(protocolOptions: protocol.ExternalProjectCompilerOptions): CompilerOptions & protocol.CompileOnSaveMixin {
     compilerOptionConverters.forEach((mappedValues, id) => {
         const propertyValue = protocolOptions[id];
@@ -467,6 +490,14 @@ export function convertCompilerOptions(protocolOptions: protocol.ExternalProject
     return protocolOptions as any;
 }
 
+/**
+ * Converts external project watch options provided via protocol into compiler watch options.
+ * Also validates the converted options and generates diagnostics for invalid ones.
+ *
+ * @param protocolOptions - External project compiler options from the protocol.
+ * @param currentDirectory - Current directory for resolving relative paths in options, optional.
+ * @returns An object containing the converted watch options and diagnostics for any invalid options, or undefined if no watch options are set.
+ */
 export function convertWatchOptions(protocolOptions: protocol.ExternalProjectCompilerOptions, currentDirectory?: string): WatchOptionsAndErrors | undefined {
     let watchOptions: WatchOptions | undefined;
     let errors: Diagnostic[] | undefined;
@@ -481,6 +512,16 @@ export function convertWatchOptions(protocolOptions: protocol.ExternalProjectCom
     return watchOptions && { watchOptions, errors };
 }
 
+/**
+ * Converts the given compiler options related to type acquisition from a protocol request into 
+ * a format that is compatible with TypeScript's internal representation.
+ *
+ * @param protocolOptions - The compiler options received in a protocol request.
+ *                          These options include properties related to type acquisition such
+ *                          as `enable`, `include`, and `exclude`. Only options defined in 
+ *                          `typeAcquisitionDeclarations` are considered.
+ * @returns The converted Type Acquisition object, or undefined if no relevant options are provided.
+ */
 export function convertTypeAcquisition(protocolOptions: protocol.InferredProjectCompilerOptions): TypeAcquisition | undefined {
     let result: TypeAcquisition | undefined;
     typeAcquisitionDeclarations.forEach(option => {
@@ -491,10 +532,24 @@ export function convertTypeAcquisition(protocolOptions: protocol.InferredProject
     return result;
 }
 
+/**
+ * Attempts to convert a script kind name or enum value to a `ScriptKind` enum.
+ * 
+ * @param scriptKindName - The script kind specified either as a string or a numeric enum value.
+ * @returns The corresponding `ScriptKind` enum value if the input is a string; otherwise, 
+ *          returns the `ScriptKind` directly.
+ */
 export function tryConvertScriptKindName(scriptKindName: protocol.ScriptKindName | ScriptKind): ScriptKind {
     return isString(scriptKindName) ? convertScriptKindName(scriptKindName) : scriptKindName;
 }
 
+/**
+ * Converts a script kind name from a protocol representation to a corresponding internal representation.
+ * 
+ * @param scriptKindName - The script kind name as defined in the protocol (e.g., "JS", "JSX", "TS", "TSX").
+ * If the `scriptKindName` is unknown, it defaults to `ScriptKind.Unknown`.
+ * @returns The corresponding internal `ScriptKind` enumeration value.
+ */
 export function convertScriptKindName(scriptKindName: protocol.ScriptKindName): ScriptKind {
     switch (scriptKindName) {
         case "JS":
@@ -510,7 +565,11 @@ export function convertScriptKindName(scriptKindName: protocol.ScriptKindName): 
     }
 }
 
-/** @internal */
+/**
+ * Converts user preferences by removing the `lazyConfiguredProjectsFromExternalProject` property
+ * and returning the remaining preferences.
+ * @param preferences The user preferences to convert.
+ */
 export function convertUserPreferences(preferences: protocol.UserPreferences): UserPreferences {
     const { lazyConfiguredProjectsFromExternalProject: _, ...userPreferences } = preferences;
     return userPreferences;
@@ -1036,7 +1095,12 @@ export interface WildcardWatcher extends FileWatcher {
     packageJsonWatches: Set<PackageJsonWatcher> | undefined;
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Returns detailed information about the watch based on the watch type and project.
+ * @param watchType The type of watch.
+ * @param project The project or normalized path associated with the watch.
+ */
 export function getDetailWatchInfo(watchType: WatchType, project: Project | NormalizedPath | undefined) {
     return `${isString(project) ? `Config: ${project} ` : project ? `Project: ${project.getProjectName()} ` : ""}WatchType: ${watchType}`;
 }
@@ -1046,7 +1110,9 @@ function isScriptInfoWatchedFromNodeModules(info: ScriptInfo) {
 }
 
 /**
- * returns true if project updated with new program
+ * Returns true if the project is dirty and successfully updates its program.
+ * Invalidates resolutions of failed lookup locations before updating.
+ * @param project The project to check and update.
  * @internal
  */
 export function updateProjectIfDirty(project: Project): boolean {
@@ -5712,7 +5778,10 @@ function createIncompleteCompletionsCache(): IncompleteCompletionsCache {
 
 /** @internal */
 export type ScriptInfoOrConfig = ScriptInfo | TsConfigSourceFile;
-/** @internal */
+/**
+ * Determines if the given configuration is a TypeScript configuration file.
+ * @param config The configuration to check.
+ */
 export function isConfigFile(config: ScriptInfoOrConfig): config is TsConfigSourceFile {
     return (config as TsConfigSourceFile).kind !== undefined;
 }

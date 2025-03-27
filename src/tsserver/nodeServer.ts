@@ -106,7 +106,11 @@ function parseServerMode(): LanguageServiceMode | string | undefined {
     }
 }
 
-/** @internal */
+/**
+ * Initializes the Node.js system for the TypeScript server.
+ * Sets up logging, directory watching, message writing, and other system configurations.
+ * Returns an object containing arguments, logger, cancellation token, server mode, and session starter.
+ */
 export function initializeNodeSystem(): StartInput {
     const sys = Debug.checkDefined(ts.sys) as ts.server.ServerHost;
 

@@ -64,7 +64,23 @@ import {
 
 const visitedNestedConvertibleFunctions = new Map<string, true>();
 
-/** @internal */
+/** 
+ * Computes suggestion diagnostics for a given source file.
+ * 
+ * This function analyzes the source file and generates diagnostics for potential improvements or conversions, such as:
+ * - Converting CommonJS modules to ES modules.
+ * - Converting `require` calls to `import` statements.
+ * - Converting JSDoc typedefs to TypeScript types.
+ * - Moving JSDoc types to TypeScript types.
+ * - Converting constructor functions to class declarations.
+ * - Converting functions to async functions.
+ * - Converting imports to default imports where applicable.
+ * 
+ * @param sourceFile The source file to analyze.
+ * @param program The program containing the source file.
+ * @param cancellationToken A token to signal cancellation of the operation.
+ * @returns An array of diagnostics with location information.
+ */
 export function computeSuggestionDiagnostics(sourceFile: SourceFile, program: Program, cancellationToken: CancellationToken): DiagnosticWithLocation[] {
     program.getSemanticDiagnostics(sourceFile, cancellationToken);
     const diags: DiagnosticWithLocation[] = [];
@@ -194,7 +210,12 @@ function isConvertibleFunction(node: FunctionLikeDeclaration, checker: TypeCheck
         returnsPromise(node, checker);
 }
 
-/** @internal */
+/**
+ * Determines if the given function-like declaration returns a Promise.
+ * 
+ * @param node - The function-like declaration to check.
+ * @param checker - The type checker used to analyze the function's return type.
+ */
 export function returnsPromise(node: FunctionLikeDeclaration, checker: TypeChecker): boolean {
     const signature = checker.getSignatureFromDeclaration(node);
     const returnType = signature ? checker.getReturnTypeOfSignature(signature) : undefined;
@@ -209,13 +230,28 @@ function hasReturnStatementWithPromiseHandler(body: Block, checker: TypeChecker)
     return !!forEachReturnStatement(body, statement => isReturnStatementWithFixablePromiseHandler(statement, checker));
 }
 
-/** @internal */
+/** 
+ * Determines if a node is a return statement with a fixable promise handler.
+ * A fixable promise handler is a call expression that meets specific criteria for transformation.
+ * 
+ * @param node - The node to check.
+ * @param checker - The type checker used for validation.
+ * @returns True if the node is a return statement with a fixable promise handler, otherwise false.
+ */
 export function isReturnStatementWithFixablePromiseHandler(node: Node, checker: TypeChecker): node is ReturnStatement & { expression: CallExpression; } {
     return isReturnStatement(node) && !!node.expression && isFixablePromiseHandler(node.expression, checker);
 }
 
 // Should be kept up to date with transformExpression in convertToAsyncFunction.ts
-/** @internal */
+/** 
+ * Checks if a node is a fixable promise handler.
+ * A fixable promise handler is a call expression that represents a promise method
+ * (e.g., `then`, `catch`, `finally`) with supported arguments and valid chained calls.
+ * 
+ * @param node - The node to check.
+ * @param checker - The type checker to use for validation.
+ * @returns Whether the node is a fixable promise handler.
+ */
 export function isFixablePromiseHandler(node: Node, checker: TypeChecker): boolean {
     // ensure outermost call exists and is a promise handler
     if (!isPromiseHandler(node) || !hasSupportedNumberOfArguments(node) || !node.arguments.every(arg => isFixablePromiseArgument(arg, checker))) {
@@ -306,7 +342,12 @@ function canBeConvertedToClass(node: Node, checker: TypeChecker): boolean {
     return false;
 }
 
-/** @internal */
+/** 
+ * Determines if a given node can be converted to an async function.
+ * 
+ * @param node - The node to check.
+ * @returns True if the node is a FunctionDeclaration, MethodDeclaration, FunctionExpression, or ArrowFunction; otherwise, false.
+ */
 export function canBeConvertedToAsync(node: Node): node is FunctionDeclaration | MethodDeclaration | FunctionExpression | ArrowFunction {
     switch (node.kind) {
         case SyntaxKind.FunctionDeclaration:

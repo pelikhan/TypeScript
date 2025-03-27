@@ -24,7 +24,13 @@ export interface PackageJsonCache {
     searchDirectoryAndAncestors(directory: string, project: Project): void;
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Creates a cache for managing package.json files within a project.
+ * 
+ * @param host The project service host used for file operations and path conversions.
+ * @returns An object implementing the PackageJsonCache interface.
+ */
 export function createPackageJsonCache(host: ProjectService): PackageJsonCache {
     const packageJsons = new Map<Path, ProjectPackageJsonInfo>();
     const directoriesWithoutPackageJson = new Map<Path, true>();

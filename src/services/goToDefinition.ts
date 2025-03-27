@@ -112,7 +112,17 @@ import {
     unescapeLeadingUnderscores,
 } from "./_namespaces/ts.js";
 
-/** @internal */
+/** 
+ * @internal
+ * Retrieves the definition information for a symbol at a given position in a source file.
+ * 
+ * @param program The program containing the source file.
+ * @param sourceFile The source file to search within.
+ * @param position The position in the source file to find the definition for.
+ * @param searchOtherFilesOnly Optional. If true, only searches for definitions in other files.
+ * @param stopAtAlias Optional. If true, stops at alias symbols instead of resolving them.
+ * @returns An array of definition information or undefined if no definition is found.
+ */
 export function getDefinitionAtPosition(program: Program, sourceFile: SourceFile, position: number, searchOtherFilesOnly?: boolean, stopAtAlias?: boolean): readonly DefinitionInfo[] | undefined {
     const resolvedRef = getReferenceAtPosition(sourceFile, position, program);
     const fileReferenceDefinition = resolvedRef && [getDefinitionInfoForFileReference(resolvedRef.reference.fileName, resolvedRef.fileName, resolvedRef.unverified)] || emptyArray;
@@ -338,7 +348,15 @@ function getDefinitionFromOverriddenMember(typeChecker: TypeChecker, node: Node)
     return getDefinitionFromSymbol(typeChecker, symbol, node);
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Gets the reference at a given position in a source file.
+ * 
+ * @param sourceFile The source file to search for references.
+ * @param position The position in the source file to check for a reference.
+ * @param program The program containing the source file and its dependencies.
+ * @returns An object containing the reference, file name, and optionally the file, or undefined if no reference is found.
+ */
 export function getReferenceAtPosition(sourceFile: SourceFile, position: number, program: Program): { reference: FileReference; fileName: string; unverified: boolean; file?: SourceFile; } | undefined {
     const referencePath = findReferenceInPosition(sourceFile.referencedFiles, position);
     if (referencePath) {
@@ -448,7 +466,15 @@ function getFirstTypeArgumentDefinitions(typeChecker: TypeChecker, type: Type, n
 }
 
 /// Goto type
-/** @internal */
+/** 
+ * @internal
+ * Gets the type definition at a specified position in a source file.
+ * 
+ * @param typeChecker - The type checker to use for retrieving type information.
+ * @param sourceFile - The source file to search within.
+ * @param position - The position in the source file to get the type definition for.
+ * @returns An array of definition information or undefined if no definition is found.
+ */
 export function getTypeDefinitionAtPosition(typeChecker: TypeChecker, sourceFile: SourceFile, position: number): readonly DefinitionInfo[] | undefined {
     const node = getTouchingPropertyName(sourceFile, position);
     if (node === sourceFile) {
@@ -497,7 +523,16 @@ function tryGetReturnTypeOfFunction(symbol: Symbol, type: Type, checker: TypeChe
     return undefined;
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Retrieves the definition information and the text span for a given position in a source file.
+ * If the position corresponds to a triple-slash reference, the text span of the reference is returned.
+ * 
+ * @param program The program containing the source file.
+ * @param sourceFile The source file to search within.
+ * @param position The position in the source file to get the definition and text span for.
+ * @returns The definition information and text span, or undefined if no definition is found.
+ */
 export function getDefinitionAndBoundSpan(program: Program, sourceFile: SourceFile, position: number): DefinitionInfoAndBoundSpan | undefined {
     const definitions = getDefinitionAtPosition(program, sourceFile, position);
 
@@ -638,6 +673,13 @@ function getDefinitionFromSymbol(typeChecker: TypeChecker, symbol: Symbol, node:
 
 /**
  * Creates a DefinitionInfo from a Declaration, using the declaration's name if possible.
+ *
+ * @param declaration The declaration to create the DefinitionInfo from.
+ * @param checker The TypeChecker used to retrieve symbol and type information.
+ * @param symbol The symbol associated with the declaration.
+ * @param node The node context for the symbol.
+ * @param unverified Optional flag indicating if the DefinitionInfo is unverified.
+ * @param failedAliasResolution Optional flag indicating if alias resolution failed.
  *
  * @internal
  */

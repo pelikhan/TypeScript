@@ -195,7 +195,21 @@ function createNameAndKindSet(): NameAndKindSet {
     };
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Gets completions for string literals at a given position in a source file.
+ * 
+ * @param sourceFile The source file in which completions are requested.
+ * @param position The position in the source file where completions are requested.
+ * @param contextToken The token at the completion position, if any.
+ * @param options Compiler options in use.
+ * @param host The language service host.
+ * @param program The program instance.
+ * @param log Logger for debugging or diagnostics.
+ * @param preferences User preferences for completions.
+ * @param includeSymbol Whether to include symbol information in the completions.
+ * @returns Completion information or undefined if no completions are available.
+ */
 export function getStringLiteralCompletions(
     sourceFile: SourceFile,
     position: number,
@@ -305,7 +319,18 @@ function convertStringLiteralCompletions(
     }
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Retrieves the completion details for a string literal based on the given name, source file, position, context token, program, host, cancellation token, and user preferences.
+ * @param name The name of the string literal for which completion details are requested.
+ * @param sourceFile The source file containing the string literal.
+ * @param position The position in the source file where completions are requested.
+ * @param contextToken The token at the current position, used to determine the context for completions.
+ * @param program The program instance providing type-checking and symbol information.
+ * @param host The language service host for resolving module specifiers and other utilities.
+ * @param cancellationToken A token to signal cancellation of the operation.
+ * @param preferences User preferences that may affect the completion details.
+ */
 export function getStringLiteralCompletionDetails(
     name: string,
     sourceFile: SourceFile,

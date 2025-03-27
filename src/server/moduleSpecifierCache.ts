@@ -17,7 +17,12 @@ export interface ModuleSpecifierResolutionCacheHost {
     toPath(fileName: string): Path;
 }
 
-/** @internal */
+/** 
+ * Creates a cache for module specifier resolution.
+ * 
+ * @param host - The host providing methods to watch node_modules and convert file names to paths.
+ * @returns A ModuleSpecifierCache object with methods to get, set, and manage cached module specifier information.
+ */
 export function createModuleSpecifierCache(host: ModuleSpecifierResolutionCacheHost): ModuleSpecifierCache {
     let containedNodeModulesWatchers: Map<Path, FileWatcher> | undefined;
     let cache: Map<Path, ResolvedModuleSpecifierInfo> | undefined;

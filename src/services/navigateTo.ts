@@ -37,7 +37,18 @@ interface RawNavigateToItem {
     readonly declaration: Declaration;
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Retrieves a list of NavigateToItem objects that match the search value across the provided source files.
+ * 
+ * @param sourceFiles - The source files to search through.
+ * @param checker - The TypeChecker instance used for symbol resolution.
+ * @param cancellationToken - Token to monitor for cancellation requests.
+ * @param searchValue - The search string to match against declarations.
+ * @param maxResultCount - The maximum number of results to return. If undefined, all matches are returned.
+ * @param excludeDtsFiles - Whether to exclude declaration (.d.ts) files from the search.
+ * @param excludeLibFiles - Whether to exclude standard library files from the search.
+ */
 export function getNavigateToItems(sourceFiles: readonly SourceFile[], checker: TypeChecker, cancellationToken: CancellationToken, searchValue: string, maxResultCount: number | undefined, excludeDtsFiles: boolean, excludeLibFiles?: boolean): NavigateToItem[] {
     const patternMatcher = createPatternMatcher(searchValue);
     if (!patternMatcher) return emptyArray;

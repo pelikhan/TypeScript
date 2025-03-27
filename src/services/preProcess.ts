@@ -13,6 +13,14 @@ import {
     SyntaxKind,
 } from "./_namespaces/ts.js";
 
+/**
+ * Preprocesses a file to extract relevant information about its imports, exports, and pragmas.
+ *
+ * @param sourceText  The source code of the file to be processed.
+ * @param readImportFiles  A flag indicating whether to process import statements in the file.
+ * @param detectJavaScriptImports  A flag indicating whether to detect JavaScript-specific imports like `require` and `define`.
+ * @returns An object containing preprocessed file information such as referenced files, type reference directives, library reference directives, imported files, ambient external modules, and AMD dependencies.
+ */
 export function preProcessFile(sourceText: string, readImportFiles = true, detectJavaScriptImports = false): PreProcessedFileInfo {
     const pragmaContext: PragmaContext = {
         languageVersion: ScriptTarget.ES5, // controls whether the token scanner considers unicode identifiers or not - shouldn't matter, since we're only using it for trivia

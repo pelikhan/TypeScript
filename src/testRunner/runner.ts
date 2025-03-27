@@ -55,6 +55,19 @@ function tryGetConfig(args: string[]) {
     return configPath && configPath.replace(/^["']|["']$/g, "");
 }
 
+/** 
+ * Creates and returns a test runner instance based on the specified runner kind.
+ * 
+ * @param kind - The kind of test runner to create. Valid options are:
+ *   - "conformance": Creates a CompilerBaselineRunner for conformance tests.
+ *   - "compiler": Creates a CompilerBaselineRunner for regression tests.
+ *   - "fourslash": Creates a FourSlashRunner for native FourSlash tests.
+ *   - "fourslash-server": Creates a FourSlashRunner for server-based FourSlash tests.
+ *   - "project": Creates a ProjectRunner for project-related tests.
+ *   - "transpile": Creates a TranspileRunner for transpile tests.
+ * 
+ * @returns The corresponding runner instance for the specified kind. Throws an error if the kind is unknown.
+ */
 export function createRunner(kind: TestRunnerKind): RunnerBase {
     switch (kind) {
         case "conformance":

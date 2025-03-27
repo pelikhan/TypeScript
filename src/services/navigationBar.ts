@@ -165,7 +165,12 @@ interface NavigationBarNode {
     indent: number; // # of parents
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Retrieves navigation bar items for the given source file.
+ * @param sourceFile The source file to analyze.
+ * @param cancellationToken Token to signal cancellation of the operation.
+ */
 export function getNavigationBarItems(sourceFile: SourceFile, cancellationToken: CancellationToken): NavigationBarItem[] {
     curCancellationToken = cancellationToken;
     curSourceFile = sourceFile;
@@ -177,7 +182,12 @@ export function getNavigationBarItems(sourceFile: SourceFile, cancellationToken:
     }
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Gets the navigation tree for a given source file.
+ * @param sourceFile The source file to generate the navigation tree for.
+ * @param cancellationToken A token to signal cancellation of the operation.
+ */
 export function getNavigationTree(sourceFile: SourceFile, cancellationToken: CancellationToken): NavigationTree {
     curCancellationToken = cancellationToken;
     curSourceFile = sourceFile;

@@ -112,7 +112,17 @@ function createPatternMatch(kind: PatternMatchKind, isCaseSensitive: boolean): P
     };
 }
 
-/** @internal */
+/** 
+ * Creates a pattern matcher for the given pattern.
+ * 
+ * The pattern matcher caches information about candidate strings to avoid redundant computations.
+ * It splits the pattern into dot-separated segments and processes each segment.
+ * 
+ * Returns undefined if the pattern contains invalid segments.
+ * 
+ * @param pattern - The pattern string to create a matcher for.
+ * @returns A PatternMatcher object or undefined if the pattern is invalid.
+ */
 export function createPatternMatcher(pattern: string): PatternMatcher | undefined {
     // We'll often see the same candidate string many times when searching (For example, when
     // we see the name of a module that is used everywhere, or the name of an overload).  As
@@ -485,12 +495,23 @@ function createTextChunk(text: string): TextChunk {
     };
 }
 
-/** @internal */
+/**
+ * Breaks an identifier into character spans.
+ * 
+ * @param identifier - The identifier to break into spans.
+ * @internal
+ */
 export function breakIntoCharacterSpans(identifier: string): TextSpan[] {
     return breakIntoSpans(identifier, /*word*/ false);
 }
 
-/** @internal */
+/** 
+ * Breaks the given identifier into word spans.
+ * 
+ * @param identifier - The identifier to break into word spans.
+ * @returns An array of text spans representing the word spans.
+ * @internal 
+ */
 export function breakIntoWordSpans(identifier: string): TextSpan[] {
     return breakIntoSpans(identifier, /*word*/ true);
 }

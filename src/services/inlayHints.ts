@@ -142,7 +142,13 @@ function shouldUseInteractiveInlayHints(preferences: UserPreferences) {
     return preferences.interactiveInlayHints === true;
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Provides inlay hints for the given context.
+ * 
+ * @param context - The context containing the file, program, span, cancellation token, and preferences.
+ * @returns An array of inlay hints.
+ */
 export function provideInlayHints(context: InlayHintsContext): InlayHint[] {
     const { file, program, span, cancellationToken, preferences } = context;
     const sourceFileText = file.text;

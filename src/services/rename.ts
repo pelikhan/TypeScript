@@ -52,7 +52,17 @@ import {
     UserPreferences,
 } from "./_namespaces/ts.js";
 
-/** @internal */
+/** 
+ * Retrieves rename information for a given position in a source file.
+ * Determines if the element at the specified position is eligible for renaming.
+ * If eligible, gathers relevant rename information; otherwise, returns an error.
+ * 
+ * @param program The TypeScript program instance.
+ * @param sourceFile The source file containing the position.
+ * @param position The position in the source file to check for rename eligibility.
+ * @param preferences User preferences for rename behavior.
+ * @returns Rename information or an error if renaming is not allowed.
+ */
 export function getRenameInfo(program: Program, sourceFile: SourceFile, position: number, preferences: UserPreferences): RenameInfo {
     const node = getAdjustedRenameLocation(getTouchingPropertyName(sourceFile, position));
     if (nodeIsEligibleForRename(node)) {
@@ -227,7 +237,19 @@ function createTriggerSpanForNode(node: Node, sourceFile: SourceFile) {
     return createTextSpan(start, width);
 }
 
-/** @internal */
+/** 
+ * Determines if a given node is eligible for renaming.
+ * 
+ * A node is considered eligible for renaming if it is one of the following:
+ * - An identifier
+ * - A private identifier
+ * - A string literal
+ * - A no-substitution template literal
+ * - The `this` keyword
+ * - A numeric literal that is the name of a property declaration or index access
+ * 
+ * @param node The node to check for rename eligibility.
+ */
 export function nodeIsEligibleForRename(node: Node): boolean {
     switch (node.kind) {
         case SyntaxKind.Identifier:

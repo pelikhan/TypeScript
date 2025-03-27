@@ -123,7 +123,17 @@ interface ArgumentListInfo {
     readonly argumentCount: number;
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Provides signature help items for a given position in a source file.
+ * 
+ * @param program The program containing the source file.
+ * @param sourceFile The source file in which to provide signature help.
+ * @param position The position in the source file where signature help is requested.
+ * @param triggerReason The reason signature help was triggered, if any.
+ * @param cancellationToken A token to monitor for cancellation requests.
+ * @returns Signature help items or undefined if none are available.
+ */
 export function getSignatureHelpItems(program: Program, sourceFile: SourceFile, position: number, triggerReason: SignatureHelpTriggerReason | undefined, cancellationToken: CancellationToken): SignatureHelpItems | undefined {
     const typeChecker = program.getTypeChecker();
 
@@ -274,7 +284,16 @@ export interface ArgumentInfoForCompletions {
     readonly argumentIndex: number;
     readonly argumentCount: number;
 }
-/** @internal */
+/**
+ * Retrieves argument information for completions if the provided node is part of a valid function call.
+ * 
+ * @param node - The node to analyze for argument information.
+ * @param position - The position within the source file to check.
+ * @param sourceFile - The source file containing the node.
+ * @param checker - The type checker to use for analysis.
+ * @returns Argument information for completions or undefined if not applicable.
+ * @internal
+ */
 export function getArgumentInfoForCompletions(node: Node, position: number, sourceFile: SourceFile, checker: TypeChecker): ArgumentInfoForCompletions | undefined {
     const info = getImmediatelyContainingArgumentInfo(node, position, sourceFile, checker);
     return !info || info.isTypeParameterList || info.invocation.kind !== InvocationKind.Call ? undefined

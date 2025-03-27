@@ -183,7 +183,17 @@ const jsDocTagNames = [
 let jsDocTagNameCompletionEntries: CompletionEntry[];
 let jsDocTagCompletionEntries: CompletionEntry[];
 
-/** @internal */
+/** 
+ * @internal
+ * Retrieves JSDoc comments from a list of declarations.
+ * Only collects comments from duplicate declarations once to avoid redundancy.
+ * Skips comments containing @typedefs unless they are associated with specific declarations or part of function documentation.
+ * Handles inherited documentation via @inheritDoc or @inheritdoc tags.
+ * 
+ * @param declarations The list of declarations to extract JSDoc comments from.
+ * @param checker Optional type checker for processing comments.
+ * @returns An array of symbol display parts representing the extracted comments.
+ */
 export function getJsDocCommentsFromDeclarations(declarations: readonly Declaration[], checker?: TypeChecker): SymbolDisplayPart[] {
     // Only collect doc comments from duplicate declarations once:
     // In case of a union property there might be same declaration multiple times
@@ -243,7 +253,15 @@ function getCommentHavingNodes(declaration: Declaration): readonly (JSDoc | JSDo
     }
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Retrieves JSDoc tags from the provided declarations.
+ * Only collects doc comments from duplicate declarations once.
+ * Skips comments containing @typedefs unless they include @param or @return tags.
+ * @param declarations The declarations to extract JSDoc tags from.
+ * @param checker The type checker used to resolve tag information.
+ * @returns An array of JSDocTagInfo objects containing tag names and associated text.
+ */
 export function getJsDocTagsFromDeclarations(declarations?: Declaration[], checker?: TypeChecker): JSDocTagInfo[] {
     // Only collect doc comments from duplicate declarations once.
     const infos: JSDocTagInfo[] = [];
@@ -370,7 +388,10 @@ function getTagNameDisplayPart(kind: SyntaxKind): (text: string) => SymbolDispla
     }
 }
 
-/** @internal */
+/** 
+ * @internal
+ * Retrieves completion entries for JSDoc tag names.
+ */
 export function getJSDocTagNameCompletions(): CompletionEntry[] {
     return jsDocTagNameCompletionEntries || (jsDocTagNameCompletionEntries = map(jsDocTagNames, tagName => {
         return {
@@ -385,7 +406,10 @@ export function getJSDocTagNameCompletions(): CompletionEntry[] {
 /** @internal */
 export const getJSDocTagNameCompletionDetails: typeof getJSDocTagCompletionDetails = getJSDocTagCompletionDetails;
 
-/** @internal */
+/** 
+ * @internal
+ * Retrieves completion entries for JSDoc tags.
+ */
 export function getJSDocTagCompletions(): CompletionEntry[] {
     return jsDocTagCompletionEntries || (jsDocTagCompletionEntries = map(jsDocTagNames, tagName => {
         return {
@@ -397,7 +421,11 @@ export function getJSDocTagCompletions(): CompletionEntry[] {
     }));
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Retrieves completion details for a JSDoc tag by its name.
+ * @param name The name of the JSDoc tag.
+ */
 export function getJSDocTagCompletionDetails(name: string): CompletionEntryDetails {
     return {
         name,
@@ -410,7 +438,12 @@ export function getJSDocTagCompletionDetails(name: string): CompletionEntryDetai
     };
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Provides completions for JSDoc parameter names within a JSDoc parameter tag.
+ * 
+ * @param tag The JSDoc parameter tag to provide completions for.
+ */
 export function getJSDocParameterNameCompletions(tag: JSDocParameterTag): CompletionEntry[] {
     if (!isIdentifier(tag.name)) {
         return emptyArray;
@@ -435,7 +468,11 @@ export function getJSDocParameterNameCompletions(tag: JSDocParameterTag): Comple
     });
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Retrieves completion details for a JSDoc parameter name.
+ * @param name The name of the parameter.
+ */
 export function getJSDocParameterNameCompletionDetails(name: string): CompletionEntryDetails {
     return {
         name,
@@ -450,7 +487,7 @@ export function getJSDocParameterNameCompletionDetails(name: string): Completion
 
 /**
  * Checks if position points to a valid position to add JSDoc comments, and if so,
- * returns the appropriate template. Otherwise returns an empty string.
+ * returns the appropriate template. Otherwise returns undefined.
  * Valid positions are
  *      - outside of comments, statements, and expressions, and
  *      - preceding a:
@@ -464,12 +501,15 @@ export function getJSDocParameterNameCompletionDetails(name: string): Completion
  *
  * Hosts should ideally check that:
  * - The line is all whitespace up to 'position' before performing the insertion.
- * - If the keystroke sequence "/\*\*" induced the call, we also check that the next
+ * - If the keystroke sequence "/**" induced the call, we also check that the next
  * non-whitespace character is '*', which (approximately) indicates whether we added
  * the second '*' to complete an existing (JSDoc) comment.
- * @param fileName The file in which to perform the check.
+ * 
+ * @param newLine The newline character(s) to use in the generated template.
+ * @param sourceFile The source file in which to perform the check.
  * @param position The (character-indexed) position in the file where the check should
  * be performed.
+ * @param options Optional settings to customize the generated JSDoc template.
  *
  * @internal
  */

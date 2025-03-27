@@ -113,7 +113,13 @@ import {
 const symbolDisplayNodeBuilderFlags = NodeBuilderFlags.OmitParameterModifiers | NodeBuilderFlags.IgnoreErrors | NodeBuilderFlags.UseAliasDefinedOutsideCurrentScope;
 
 // TODO(drosen): use contextual SemanticMeaning.
-/** @internal */
+/** 
+ * @internal 
+ * Determines the kind of a symbol at a given location.
+ * @param typeChecker The type checker to use for symbol analysis.
+ * @param symbol The symbol whose kind is to be determined.
+ * @param location The location in the source code where the symbol is being analyzed.
+ */
 export function getSymbolKind(typeChecker: TypeChecker, symbol: Symbol, location: Node): ScriptElementKind {
     const result = getSymbolKindOfConstructorPropertyMethodAccessorFunctionOrVar(typeChecker, symbol, location);
     if (result !== ScriptElementKind.unknown) {
@@ -227,7 +233,13 @@ function getNormalizedSymbolModifiers(symbol: Symbol) {
     return [];
 }
 
-/** @internal */
+/** 
+ * @internal 
+ * Retrieves the modifiers for a given symbol, including normalized modifiers and optional modifiers. 
+ * If the symbol is an alias, resolves the aliased symbol and includes its modifiers.
+ * @param typeChecker The type checker used to resolve aliased symbols.
+ * @param symbol The symbol whose modifiers are to be retrieved.
+ */
 export function getSymbolModifiers(typeChecker: TypeChecker, symbol: Symbol): string {
     if (!symbol) {
         return ScriptElementKindModifier.none;
@@ -865,7 +877,18 @@ function getSymbolDisplayPartsDocumentationAndSymbolKindWorker(typeChecker: Type
 }
 
 // TODO(drosen): Currently completion entry details passes the SemanticMeaning.All instead of using semanticMeaning of location
-/** @internal */
+/** 
+ * @internal 
+ * Gets the display parts, documentation, and symbol kind for a given symbol.
+ * 
+ * @param typeChecker The type checker to use for symbol analysis.
+ * @param symbol The symbol to get information for.
+ * @param sourceFile The source file containing the symbol.
+ * @param enclosingDeclaration The enclosing declaration of the symbol, if any.
+ * @param location The location of the symbol in the source file.
+ * @param semanticMeaning The semantic meaning of the symbol at the given location.
+ * @param alias An optional alias symbol, if the symbol is accessed through an alias.
+ */
 export function getSymbolDisplayPartsDocumentationAndSymbolKind(
     typeChecker: TypeChecker,
     symbol: Symbol,
